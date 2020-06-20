@@ -91,10 +91,10 @@ router.route('/get_user_details').post((req,res) => {
                     .then(() => {
                         res.json(
                             {
-                                "username": user[0].username,
+                                "username": user[0].userName,
                                 "mobile": user[0].mobile,
                                 "status": user[0].status,
-                                "profilepic": user[0].profilepic
+                                "profilepic": user[0].profilePic
                             })
                     })
                     .catch(err => res.status(400).json('Error:' + err));
