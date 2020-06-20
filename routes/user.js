@@ -64,8 +64,8 @@ router.route('/get_session').post((req,res) => {
                     .then(() => {
                         res.json(
                             {
-                                "username": user[0].username,
-                                "profilepic": user[0].profilepic,
+                                "username": user[0].userName,
+                                "profilepic": user[0].profilePic,
                                 "lastLoggedIn": lastLogin
                             })
                     })
