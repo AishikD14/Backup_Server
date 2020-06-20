@@ -7,8 +7,8 @@ let User = require('../models/user.model');
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'mindwebsmailer@gmail.com',
-        pass: 'berskfmihfomvowk'
+        user: 'project.demo.react.2020@gmail.com',
+        pass: 'yfopjjwdbarsrztn'
     }
 });
 
@@ -17,17 +17,21 @@ router.route('/').get((req,res) => {
         .then(users => res.json(users))
         .catch(err => res.status(400).json('Error:' + err));
 });
-
+// For user login and to generate user token
 router.route('/login').post((req,res) => {
+    // Get email and password from frontend
     const email = req.body.email;
     const password = req.body.password;
     const time = new Date();
+    // Find the user with the email id in mongodb
     User.find({email: email, password: password})
         .then(users => {
             if(!users.length){
+                // If not found in db, notify frontend
                 res.status(206).json({"message":'Failure'});
             }
             else{
+                // Else generate new token for user for token authentication and send token to frontend
                 users[0].sessionToken = sha256(email + time.toString());
                 users[0].save()
                     .then(() => 
@@ -44,6 +48,7 @@ router.route('/login').post((req,res) => {
         .catch(err => res.status(400).json('Error:' + err));
 });
 
+// To get user session token for seamless login
 router.route('/get_session').post((req,res) => {
     const token = req.body.token;
     User.find({ sessionToken: token })
@@ -59,8 +64,8 @@ router.route('/get_session').post((req,res) => {
                     .then(() => {
                         res.json(
                             {
-                                "userName": user[0].userName,
-                                "profilePic": user[0].profilePic,
+                                "username": user[0].username,
+                                "profilepic": user[0].profilepic,
                                 "lastLoggedIn": lastLogin
                             })
                     })
@@ -70,6 +75,55 @@ router.route('/get_session').post((req,res) => {
         .catch(err => res.status(400).json('Error:' + err));
 });
 
+// To get user session details for seamless login
+router.route('/get_user_details').post((req,res) => {
+    const token = req.body.token;
+    User.find({ sessionToken: token })
+        .then(user => {
+            // console.log(user);
+            if(user.length === 0){
+                res.status(204).json({'message': 'Failed'});
+            }
+            else{
+                const lastLogin = user[0].lastLoggedIn;
+                user[0].lastLoggedIn = new Date()
+                user[0].save()
+                    .then(() => {
+                        res.json(
+                            {
+                                "username": user[0].username,
+                                "mobile": user[0].mobile,
+                                "status": user[0].status,
+                                "profilepic": user[0].profilepic
+                            })
+                    })
+                    .catch(err => res.status(400).json('Error:' + err));
+            }
+        })
+        .catch(err => res.status(400).json('Error:' + err));
+});
+
+// To check the locally stored session token in the Mongo DB
+router.route('/check_session').post((req,res) => {
+    const token = req.body.token;
+    User.findOne({ sessionToken: token })
+        .then(user => {
+            if(!user){
+                res.json({'message': 'Failed'});
+            }
+            else{
+                user.lastLoggedIn = new Date();
+                user.save()
+                    .then(() => {
+                        res.json({"message": "Success"});
+                    })
+                    .catch(err => res.status(400).json('Error:' + err));
+            }
+        })
+        .catch(err => res.status(400).json('Error:' + err));
+});
+
+// To request OTP for registering
 router.route('/request_otp').post((req,res) => {
     const email = req.body.email;
     User.find({email: email})
@@ -85,7 +139,7 @@ router.route('/request_otp').post((req,res) => {
                 var mailOptions = {
                     from: 'mindwebsmailer@gmail.com',
                     to: email,
-                    subject: 'StackHack OTP verification',
+                    subject: 'Demo OTP verification',
                     text: 'Your OTP for verification is ' + otp
                 };
                     
@@ -104,6 +158,76 @@ router.route('/request_otp').post((req,res) => {
         .catch(err => res.status(400).json('Error:' + err));
 });
 
+// To register an user
+router.route('/register').post((req,res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+    const email = req.body.email;
+    const profilepic = req.body.pic;
+    const sessionToken = 'NULL';
+    const lastLoggedIn = new Date();
+    const resetToken = 'NULL';
+    const mobile = req.body.mobile;
+    const status = req.body.status;
+    const newUser = new User({ username, password, email, profilepic, sessionToken, lastLoggedIn, resetToken, mobile, status });
+
+    // console.log(newUser);
+    newUser.save()
+        .then(() => res.status(201).json({
+            "message": "Success"
+        }))
+        .catch(err => res.status(400).json('Error:' + err));
+});
+
+// Update Profile Pic of the user
+router.route('/update_picture').post((req,res) => {
+    const token = req.body.token;
+    User.findOne({sessionToken: token})
+    .then(user => {
+        user.profilepic = req.body.pic;
+        user.save()
+            .then(() => res.json({"message":"User Details updated"}))
+            .catch(err => res.status(400).json('Error:' + err));
+    })
+    .catch(err => res.status(400).json('Error:' + err));
+});
+
+// Update Details of the user
+router.route('/update_details').post((req,res) => {
+    const token = req.body.token;
+    User.findOne({sessionToken: token})
+    .then(user => {
+        user.username = req.body.username;
+        user.mobile = req.body.mobile;
+        user.status = req.body.status;
+        user.save()
+            .then(() => res.json('User Details updated'))
+            .catch(err => res.status(400).json('Error:' + err));
+    })
+    .catch(err => res.status(400).json('Error:' + err));
+});
+
+// Change password for the user
+router.route('/change_password').post((req,res) => {
+    const token = req.body.token;
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.newPassword;
+    User.findOne({sessionToken: token, password: oldPassword})
+    .then(user => {
+        if(!user){
+            res.json({"message" : "Failure"});
+        }
+        else{
+            user.password = newPassword;
+            user.save()
+                .then(() => res.json('Password updated'))
+                .catch(err => res.status(400).json('Error:' + err));
+        }
+    })
+    .catch(err => res.status(400).json('Error:' + err));
+});
+
+// Generate link for user to reset password and send to email
 router.route('/forgot_password').post((req,res) => {
     const email = req.body.email;
     const time = new Date();
@@ -119,10 +243,10 @@ router.route('/forgot_password').post((req,res) => {
                 user.save()
                     .then(() => {
                         var mailOptions = {
-                            from: 'mindwebsteam@gmail.com',
+                            from: 'project.demo.react.2020@gmail.com',
                             to: email,
                             subject: 'Reset Password Link',
-                            html: "Go to the link below to reset your password <br><br><br>" + "<a href='http://localhost:4200/set-password/"+resetToken+"'>Click here</a>"
+                            html: "Go to the link below to reset your password <br><br><br>" + "<a href='https://5eec97b4485a0900074c1d87--relaxed-wescoff-bb0367.netlify.app/set-password/"+resetToken+"'>Click here to reset password</a>"
                         };
                             
                         transporter.sendMail(mailOptions, function(error, info){
@@ -139,6 +263,7 @@ router.route('/forgot_password').post((req,res) => {
         .catch(err => res.status(400).json('Error:' + err));
 });
 
+// Reset the actual password from the email link
 router.route('/reset_password').post((req,res) => {
     const resettoken = req.body.token;
     const newPassword = req.body.newPassword;
@@ -151,13 +276,14 @@ router.route('/reset_password').post((req,res) => {
             user.password = newPassword;
             user.resetToken = 'NULL';
             user.save()
-                .then(() => res.json('Password reset'))
+                .then(() => res.json({"message":'Password reset'}))
                 .catch(err => res.status(400).json('Error:' + err));
         }
     })
     .catch(err => res.status(400).json('Error:' + err));
 });
 
+// Verify the token for reset such that it cannot be done multiple times
 router.route('/check_reset_token/:token').get((req,res) => {
     const resettoken = req.params.token;
     // console.log(resettoken);
@@ -172,5 +298,6 @@ router.route('/check_reset_token/:token').get((req,res) => {
     })
     .catch(err => res.status(400).json('Error:' + err));
 });
+
 
 module.exports = router;
