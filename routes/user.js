@@ -185,7 +185,7 @@ router.route('/update_picture').post((req,res) => {
     const token = req.body.token;
     User.findOne({sessionToken: token})
     .then(user => {
-        user.profilepic = req.body.pic;
+        user.profilePic = req.body.pic;
         user.save()
             .then(() => res.json({"message":"User Details updated"}))
             .catch(err => res.status(400).json('Error:' + err));
