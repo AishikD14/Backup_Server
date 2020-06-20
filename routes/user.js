@@ -160,16 +160,17 @@ router.route('/request_otp').post((req,res) => {
 
 // To register an user
 router.route('/register').post((req,res) => {
-    const username = req.body.username;
+    const userName = req.body.username;
     const password = req.body.password;
     const email = req.body.email;
-    const profilepic = req.body.pic;
+    const profilePic = req.body.pic;
     const sessionToken = 'NULL';
     const lastLoggedIn = new Date();
     const resetToken = 'NULL';
     const mobile = req.body.mobile;
     const status = req.body.status;
-    const newUser = new User({ username, password, email, profilepic, sessionToken, lastLoggedIn, resetToken, mobile, status });
+    const role = "user";
+    const newUser = new User({ userName, password, email, profilePic, sessionToken, lastLoggedIn, resetToken, mobile, status, role });
 
     // console.log(newUser);
     newUser.save()
