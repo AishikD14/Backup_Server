@@ -3,6 +3,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const basicAuth = require('express-basic-auth');
+var fileUpload = require('express-fileupload');
 const socketio = require('socket.io');
 const http = require('http');
 
@@ -19,7 +20,10 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use(basicAuth({
     users: { 'admin': 'admin' }
-}))
+}));
+app.use(fileUpload({
+    useTempFiles: true
+}));
 
 const uri = process.env.ATLAS_URI;
 mongoose.connect(uri, {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true})

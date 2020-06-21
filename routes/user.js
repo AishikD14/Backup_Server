@@ -2,6 +2,7 @@ const router = require('express').Router();
 const sha256 = require('sha256');
 const nodemailer = require("nodemailer");
 var otpGenerator = require('otp-generator');
+var cloudinary = require('cloudinary').v2;
 let User = require('../models/user.model');
 
 var transporter = nodemailer.createTransport({
@@ -11,6 +12,12 @@ var transporter = nodemailer.createTransport({
         pass: 'yfopjjwdbarsrztn'
     }
 });
+
+cloudinary.config({
+    cloud_name: 'chatify',
+    api_key: '283817198312558',
+    api_secret: 'rXixvCEAWNJsb7ZmRAEUwGuhJS0'
+})
 
 router.route('/').get((req,res) => {
     User.find()
@@ -183,14 +190,33 @@ router.route('/register').post((req,res) => {
 // Update Profile Pic of the user
 router.route('/update_picture').post((req,res) => {
     const token = req.body.token;
-    User.findOne({sessionToken: token})
-    .then(user => {
-        user.profilePic = req.body.pic;
-        user.save()
-            .then(() => res.json({"message":"User Details updated"}))
-            .catch(err => res.status(400).json('Error:' + err));
-    })
-    .catch(err => res.status(400).json('Error:' + err));
+    const file = req.files.pic;
+
+    console.log(token);
+
+    User.findOne({sessionToken: token}, 'email profilePic')
+        .then((user) => {
+            console.log(user.email);
+            cloudinary.uploader.upload(file.tempFilePath, {upload_preset: 'profile_pic', public_id: sha256(user.email)})
+                .then((cloud) => {
+                    console.log(cloud.secure_url);
+                    user.profilePic = cloud.secure_url;
+                    user.save()
+                        .then(() => res.json({"message":"User Details updated"}))
+                        .catch(err => res.status(400).json('Error:' + err));
+                })
+                .catch((err) => res.status(400).json('Error:' + err));
+        })
+        .catch(err => res.status(400).json('Error:' + err));
+
+    // User.findOne({sessionToken: token})
+    // .then(user => {
+    //     user.profilePic = req.body.pic;
+    //     user.save()
+    //         .then(() => res.json({"message":"User Details updated"}))
+    //         .catch(err => res.status(400).json('Error:' + err));
+    // })
+    // .catch(err => res.status(400).json('Error:' + err));
 });
 
 // Update Details of the user
