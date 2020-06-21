@@ -219,7 +219,7 @@ router.route('/update_details').post((req,res) => {
     const token = req.body.token;
     User.findOne({sessionToken: token})
     .then(user => {
-        user.username = req.body.userName;
+        user.userName = req.body.username;
         user.mobile = req.body.mobile;
         user.status = req.body.status;
         user.save()
