@@ -200,7 +200,7 @@ router.route('/update_picture').post((req,res) => {
             cloudinary.uploader.upload(file.tempFilePath, {upload_preset: 'profile_pic', public_id: sha256(user.email)})
                 .then((cloud) => {
                     console.log(cloud.secure_url);
-                    user.profilePic = cloud.secure_url;
+                    user.profilePic = "profile/" + sha256(user.email);
                     user.save()
                         .then(() => res.json({"message":"User Details updated"}))
                         .catch(err => res.status(400).json('Error:' + err));
