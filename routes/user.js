@@ -212,15 +212,6 @@ router.route('/update_picture').post((req,res) => {
                 .catch((err) => res.status(400).json('Error:' + err));
         })
         .catch(err => res.status(400).json('Error:' + err));
-
-    // User.findOne({sessionToken: token})
-    // .then(user => {
-    //     user.profilePic = req.body.pic;
-    //     user.save()
-    //         .then(() => res.json({"message":"User Details updated"}))
-    //         .catch(err => res.status(400).json('Error:' + err));
-    // })
-    // .catch(err => res.status(400).json('Error:' + err));
 });
 
 // Update Details of the user
@@ -228,7 +219,7 @@ router.route('/update_details').post((req,res) => {
     const token = req.body.token;
     User.findOne({sessionToken: token})
     .then(user => {
-        user.username = req.body.username;
+        user.username = req.body.userName;
         user.mobile = req.body.mobile;
         user.status = req.body.status;
         user.save()
