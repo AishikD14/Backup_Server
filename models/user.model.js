@@ -12,7 +12,8 @@ const userSchema = new Schema({
     lastLoggedIn: {type: Date },
     resetToken: { type: String},
     mobile: { type: Number, required: true },
-    status: { type: String}
+    status: { type: String},
+    picVersion: { type: String }
 },
 {
     timestamps: true

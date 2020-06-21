@@ -58,7 +58,7 @@ router.route('/login').post((req,res) => {
 // To get user session token for seamless login
 router.route('/get_session').post((req,res) => {
     const token = req.body.token;
-    User.find({ sessionToken: token })
+    User.find({ sessionToken: token }, 'userName profilePic lastLoggedIn picVersion')
         .then(user => {
             // console.log(user);
             if(user.length === 0){
@@ -73,7 +73,8 @@ router.route('/get_session').post((req,res) => {
                             {
                                 "userName": user[0].userName,
                                 "profilePic": user[0].profilePic,
-                                "lastLoggedIn": lastLogin
+                                "lastLoggedIn": lastLogin,
+                                "picVersion": user[0].picVersion
                             })
                     })
                     .catch(err => res.status(400).json('Error:' + err));
@@ -171,13 +172,14 @@ router.route('/register').post((req,res) => {
     const password = req.body.password;
     const email = req.body.email;
     const profilePic = req.body.pic;
+    const picVersion = "";
     const sessionToken = 'NULL';
     const lastLoggedIn = new Date();
     const resetToken = 'NULL';
     const mobile = req.body.mobile;
     const status = req.body.status;
     const role = "user";
-    const newUser = new User({ userName, password, email, profilePic, sessionToken, lastLoggedIn, resetToken, mobile, status, role });
+    const newUser = new User({ userName, password, email, profilePic, sessionToken, lastLoggedIn, resetToken, picVersion, mobile, status, role });
 
     // console.log(newUser);
     newUser.save()
@@ -194,13 +196,14 @@ router.route('/update_picture').post((req,res) => {
 
     console.log(token);
 
-    User.findOne({sessionToken: token}, 'email profilePic')
+    User.findOne({sessionToken: token}, 'email profilePic picVersion')
         .then((user) => {
             console.log(user.email);
             cloudinary.uploader.upload(file.tempFilePath, {upload_preset: 'profile_pic', public_id: sha256(user.email)})
                 .then((cloud) => {
-                    console.log(cloud.secure_url);
+                    console.log(cloud.version);
                     user.profilePic = "profile/" + sha256(user.email);
+                    user.picVersion = cloud.version;
                     user.save()
                         .then(() => res.json({"message":"User Details updated"}))
                         .catch(err => res.status(400).json('Error:' + err));
