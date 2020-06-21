@@ -86,7 +86,7 @@ router.route('/get_session').post((req,res) => {
 // To get user session details for seamless login
 router.route('/get_user_details').post((req,res) => {
     const token = req.body.token;
-    User.find({ sessionToken: token })
+    User.find({ sessionToken: token }, 'userName mobile status profilePic picVersion lastLoggedIn')
         .then(user => {
             // console.log(user);
             if(user.length === 0){
@@ -102,7 +102,8 @@ router.route('/get_user_details').post((req,res) => {
                                 "username": user[0].userName,
                                 "mobile": user[0].mobile,
                                 "status": user[0].status,
-                                "profilepic": user[0].profilePic
+                                "profilepic": user[0].profilePic,
+                                "picVersion": user[0].picVersion
                             })
                     })
                     .catch(err => res.status(400).json('Error:' + err));
