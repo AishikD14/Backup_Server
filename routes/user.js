@@ -321,5 +321,18 @@ router.route('/check_reset_token/:token').get((req,res) => {
     .catch(err => res.status(400).json('Error:' + err));
 });
 
+// Verify the token for reset such that it cannot be done multiple times
+router.route('/get_contacts').get((req,res) => {
+    User.find({}, 'userName email profilePic picVersion')
+    .then(user => {
+        if(!user.length){
+            res.status(204).json({"message" : "Failure"});
+        }
+        else{
+            res.json(user);
+        }
+    })
+    .catch(err => res.status(400).json('Error:' + err));
+});
 
 module.exports = router;
