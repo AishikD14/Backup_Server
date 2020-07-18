@@ -53,7 +53,7 @@ io.on('connection', (socket) => {
         console.log(name, room);
         const { error, user } = addUser({ id: socket.id, name, room });
 
-        console.log(user);
+        // console.log(user);
 
         if(error) return callback(error);
 

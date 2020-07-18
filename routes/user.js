@@ -58,7 +58,7 @@ router.route('/login').post((req,res) => {
 // To get user session token for seamless login
 router.route('/get_session').post((req,res) => {
     const token = req.body.token;
-    User.find({ sessionToken: token }, 'userName profilePic lastLoggedIn picVersion')
+    User.find({ sessionToken: token }, 'userName profilePic lastLoggedIn picVersion email')
         .then(user => {
             // console.log(user);
             if(user.length === 0){
@@ -74,7 +74,8 @@ router.route('/get_session').post((req,res) => {
                                 "userName": user[0].userName,
                                 "profilePic": user[0].profilePic,
                                 "lastLoggedIn": lastLogin,
-                                "picVersion": user[0].picVersion
+                                "picVersion": user[0].picVersion,
+                                "email": user[0].email
                             })
                     })
                     .catch(err => res.status(400).json('Error:' + err));
