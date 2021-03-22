@@ -1,3 +1,4 @@
+// Module Imports
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -19,13 +20,11 @@ app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb', extended: true}));
 app.use(express.json());
 app.use(morgan('dev'));
-app.use(basicAuth({
-    users: { 'admin': 'admin' }
-}));
 app.use(fileUpload({
     useTempFiles: true
 }));
 
+//MongoDB Connection
 const uri = process.env.ATLAS_URI;
 mongoose.connect(uri, {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true})
     .then()
@@ -35,14 +34,22 @@ connection.once('open', () => {
     console.log('MongoDB connection established successfully');
 })
 
-const usersRouter = require('./routes/user');
-
-app.use('/user',usersRouter);
-
+// Server Status
 app.route('/').get((req,res) => {
     res.json("Server started successfully on " + startTime);
 })
 
+// Route Authentication
+app.use(basicAuth({
+    users: { 'admin': 'admin' }
+}));
+
+// User router
+const usersRouter = require('./routes/user');
+
+app.use('/user',usersRouter);
+
+// Socket IO Connection
 const server = http.createServer(app);
 const io = socketio(server);
 
