@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 
 const roomSchema = new Schema({
     roomId: { type: String, required: true, unique: true },
-    user1: { type: String, required: true },
-    user2: { type: String, required: true },
+    users: { type: String, required: true },
+    type: { type: String, required: true },
     message: [{
         user: { type: String, required: true },
         text: { type: String, required: true }

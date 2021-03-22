@@ -7,7 +7,7 @@ const basicAuth = require('express-basic-auth');
 var fileUpload = require('express-fileupload');
 const socketio = require('socket.io');
 const http = require('http');
-const { addUser, removeUser, getUser, getUsersInRoom } = require('./routes/chat');
+const { removeUser, getUser, getUsersInRoom, createRoom } = require('./routes/chat');
 
 require('dotenv').config();
 
@@ -56,26 +56,18 @@ const io = socketio(server);
 io.on('connection', (socket) => {
     console.log("New connection = ",socket.id);
 
-    socket.on('join', ({ name, room }, callback) => {
-        console.log(name, room);
-        const { error, user } = addUser({ id: socket.id, name, room });
+    socket.on('join', ({ name, chatName, room }, callback) => {
+        // Create room for new connection
+        createRoom({id: socket.id, name, chatName, room});
 
-        // console.log(user);
+        socket.emit('message', {user: 'admin', text: `${name}, welcome to the room ${room}`});
+        socket.broadcast.to(room).emit('message', { user: 'admin', text: `${name}, has joined the room!`});
 
-        if(error) return callback(error);
+        socket.join(room);
 
-        socket.emit('message', {user: 'admin', text: `${name}, welcome to the room ${user.room}`});
-        socket.broadcast.to(user.room).emit('message', { user: 'admin', text: `${name}, has joined the room!`});
-
-        socket.join(user.room);
-
-        io.to(user.room).emit('roomData', {room: user.room, users: getUsersInRoom(user.room)});
+        io.to(room).emit('roomData', {room: room, users: getUsersInRoom(room)});
 
         callback("Success"); 
-
-        // if(true){
-        //     callback({error: 'error'});
-        // }
     })
 
     socket.on('sendMessage', (message, callback) => {

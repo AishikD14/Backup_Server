@@ -1,41 +1,55 @@
 // const User = require("../models/user.model");
+const Room = require("../models/room.model");
 
-const users = [];
+const userArray = [];
 
-const addUser = ({id, name, room}) => {
-    name = name.trim().toLowerCase();
-    room = room.trim().toLowerCase();
-    type = "personal";
-
-    const existingUser = users.find((user) => user.room === room);
-
+const createRoom = ({id, name, chatName, room}) => {
+    //check if room already made in cache
+    const existingUser = userArray.find((user) => user.room === room);
     if(existingUser){
-        return {error: "Room already exists"};
+        console.log("Room already exists in cache");
+        return 
     }
 
-    const user = {id, type, room};
+    const user = {id, room};
+    userArray.push(user);
 
-    users.push(user);
+    const roomId = room;
+    const message = [];
+    const users = name + "|" + chatName;
+    const type = "personal";
+    const newRoom = new Room({roomId, users, type, message});
 
-    console.log(user);
-
-    return {user};
+    //check if room already made in database
+    Room.findOne({ roomId: roomId })
+        .then(room => {
+            if(!room){
+                newRoom.save()
+                    .then(() => console.log("Room added to database"))
+                    .catch(err => console.log("Error: ", err));
+            }
+            else{
+                console.log("Room already exists in database");
+            }
+        })
+        .catch(err => console.log("Error: ", err));
+    
 }
 
 const removeUser = (id) => {
-    const index = users.findIndex((user) => user.id === id);
+    const index = userArray.findIndex((user) => user.id === id);
 
     if(index != -1){
-        return users.splice(index, 1)[0];
+        return userArray.splice(index, 1)[0];
     }
 }
 
 const getUser = (id) => {
     console.log(id);
-    console.log(users);
-    return users.find((user) => user.id === id);
+    console.log(userArray);
+    return userArray.find((user) => user.id === id);
 }
 
-const getUsersInRoom = (room) => users.find((user) => user.room === room);
+const getUsersInRoom = (room) => userArray.find((user) => user.room === room);
 
-module.exports ={ addUser, removeUser, getUser, getUsersInRoom };
+module.exports ={ removeUser, getUser, getUsersInRoom, createRoom };
