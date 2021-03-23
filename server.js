@@ -70,14 +70,14 @@ io.on('connection', (socket) => {
         callback("Success"); 
     })
 
-    socket.on('sendMessage', (message, callback) => {
-        const user = getUser(socket.id);
+    socket.on('sendMessage', ({ name, text, room }, callback) => {
+        console.log(text);
 
-        console.log(user);
+        // const user = getUser(socket.id);
 
-        io.to(user.room).emit('message', { user:user.name, text: message});
+        io.to(room).emit('message', { user:name, text});
 
-        callback();
+        callback("Message Sent");
     })
 
     socket.on('disconnect', () => {
