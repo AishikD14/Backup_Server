@@ -51,7 +51,7 @@ app.use('/user',usersRouter);
 
 // Socket IO Connection
 const server = http.createServer(app);
-const io = socketio(server, { origins: ["http://localhost:3000", "https://relaxed-lamarr-bc6151.netlify.app/"]});
+const io = socketio(server, { origins: ["http://localhost:3000", "https://relaxed-lamarr-bc6151.netlify.app"]});
 
 io.on('connection', (socket) => {
     console.log("New connection = ",socket.id);
