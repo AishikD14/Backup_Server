@@ -3,7 +3,7 @@ const Room = require("../models/room.model");
 
 router.route('/get_message_history').post((req,res) => {
     const room = req.body.room;
-    Room.findOne({ roomId: room }, 'message')
+    Room.findOne({ roomId: room }, 'type message')
         .then(chat => {
             // console.log(chat);
             if(!chat){
@@ -11,6 +11,7 @@ router.route('/get_message_history').post((req,res) => {
             }
             else{
                 res.json({
+                    "type": chat.type,
                     "message": chat.message
                 })
             }
