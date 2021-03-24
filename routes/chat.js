@@ -3,6 +3,7 @@ const Room = require("../models/room.model");
 
 const userArray = [];
 
+// Create room for new chat
 const createRoom = ({id, name, chatName, room}) => {
     //check if room already made in cache
     const existingUser = userArray.find((user) => user.room === room);
@@ -35,7 +36,20 @@ const createRoom = ({id, name, chatName, room}) => {
         .catch(err => console.log("Error: ", err));
     
 }
-
+//Update sent message to database
+const registerMessage = ({ name, text, room}) => {
+    var message = {user: name, text};
+    Room.findOne({roomId: room})
+    .then(chat => {
+        chat.message.push(message);
+        chat.message = chat.message;
+        chat.save()
+            .then(() => console.log('Message updated'))
+            .catch(err => console.log('Error:' + err));
+    })
+    .catch(err => res.status(400).json('Error:' + err));
+}
+// Remove user from server cache
 const removeUser = (id) => {
     const index = userArray.findIndex((user) => user.id === id);
 
@@ -43,7 +57,7 @@ const removeUser = (id) => {
         return userArray.splice(index, 1)[0];
     }
 }
-
+// Get info corresponding to socket id
 const getUser = (id) => {
     console.log(id);
     console.log(userArray);
@@ -52,4 +66,4 @@ const getUser = (id) => {
 
 const getUsersInRoom = (room) => userArray.find((user) => user.room === room);
 
-module.exports ={ removeUser, getUser, getUsersInRoom, createRoom };
+module.exports ={ removeUser, getUser, getUsersInRoom, createRoom, registerMessage };

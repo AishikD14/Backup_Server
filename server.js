@@ -7,7 +7,7 @@ const basicAuth = require('express-basic-auth');
 var fileUpload = require('express-fileupload');
 const socketio = require('socket.io');
 const http = require('http');
-const { removeUser, getUser, getUsersInRoom, createRoom } = require('./routes/chat');
+const { removeUser, getUser, getUsersInRoom, createRoom, registerMessage } = require('./routes/chat');
 
 require('dotenv').config();
 
@@ -60,7 +60,7 @@ io.on('connection', (socket) => {
         // Create room for new connection
         createRoom({id: socket.id, name, chatName, room});
 
-        socket.emit('message', {user: 'admin', text: `${name}, welcome to the room ${room}`});
+        socket.emit('message', {user: 'admin', text: `${name}, welcome to the room`});
         socket.broadcast.to(room).emit('message', { user: 'admin', text: `${name}, has joined the room!`});
 
         socket.join(room);
@@ -71,9 +71,11 @@ io.on('connection', (socket) => {
     })
 
     socket.on('sendMessage', ({ name, text, room }, callback) => {
-        console.log(text);
+        // console.log(text);
 
         // const user = getUser(socket.id);
+
+        registerMessage({ name, text, room});
 
         io.to(room).emit('message', { user:name, text});
 
