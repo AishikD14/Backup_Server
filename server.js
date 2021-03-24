@@ -46,8 +46,11 @@ app.use(basicAuth({
 
 // User router
 const usersRouter = require('./routes/user');
-
 app.use('/user',usersRouter);
+
+// Message router
+const messagesRouter = require('./routes/message');
+app.use('/message',messagesRouter);
 
 // Socket IO Connection
 const server = http.createServer(app);
