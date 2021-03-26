@@ -74,13 +74,14 @@ io.on('connection', (socket) => {
     })
 
     socket.on('sendMessage', ({ name, text, room }, callback) => {
-        // console.log(text);
 
         // const user = getUser(socket.id);
 
         registerMessage({ name, text, room});
 
-        io.to(room).emit('message', { user:name, text});
+        // io.to(room).emit('message', { user:name, text});
+
+        socket.broadcast.to(room).emit('message', { user:name, text});
 
         callback("Message Sent");
     })
