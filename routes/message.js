@@ -11,8 +11,7 @@ router.route('/get_message_history').post((req,res) => {
             else{
                 if(chat.message.length===0){
                     res.status(204).json({
-                        "type": chat.type,
-                        'message': 'Empty'
+                        "message": "Empty"
                     });
                 }
                 else{
