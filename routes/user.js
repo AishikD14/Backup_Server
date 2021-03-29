@@ -30,6 +30,7 @@ router.route('/login').post((req,res) => {
     const email = req.body.email;
     const password = req.body.password;
     const time = new Date();
+
     // Find the user with the email id in mongodb
     User.find({email: email, password: password})
         .then(users => {
@@ -324,7 +325,7 @@ router.route('/check_reset_token/:token').get((req,res) => {
 
 // Verify the token for reset such that it cannot be done multiple times
 router.route('/get_contacts').get((req,res) => {
-    User.find({}, 'userName email profilePic picVersion')
+    User.find({}, 'userName email profilePic picVersion role')
     .then(user => {
         if(!user.length){
             res.status(204).json({"message" : "Failure"});

@@ -48,6 +48,10 @@ app.use(basicAuth({
 const usersRouter = require('./routes/user');
 app.use('/user',usersRouter);
 
+// Admin router
+const adminsRouter = require('./routes/admin');
+app.use('/admin',adminsRouter);
+
 // Message router
 const messagesRouter = require('./routes/message');
 app.use('/message',messagesRouter);
