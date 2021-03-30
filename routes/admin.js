@@ -25,4 +25,22 @@ router.route('/get_rooms').get((req,res) => {
     .catch(err => res.status(400).json('Error:' + err));
 });
 
+// delete room in db
+router.route('/delete_room').post((req,res) => {
+    Room.findOne({roomId: req.body.room})
+    .then(room => {
+        if(!room){
+            res.status(204).json({"message" : "Room not present"});
+        }
+        else{
+            Room.deleteOne({roomId: req.body.room})
+            .then(() => {
+                res.json({"message" : "Room deleted"});
+            })
+            .catch(err => res.status(400).json('Error:' + err));
+        }
+    })
+    .catch(err => res.status(400).json('Error:' + err));
+});
+
 module.exports = router;
