@@ -337,4 +337,23 @@ router.route('/get_contacts').get((req,res) => {
     .catch(err => res.status(400).json('Error:' + err));
 });
 
+// To get contact info of a user
+router.route('/get_contact_info').post((req,res) => {
+    const email = req.body.email;
+    User.find({ email: email }, 'status lastLoggedIn')
+        .then(user => {
+            if(user.length === 0){
+                res.status(204).json({'message': 'Failed'});
+            }
+            else{
+                res.json(
+                    {
+                        "status": user[0].status,
+                        "lastLogin": user[0].lastLoggedIn
+                    })
+            }
+        })
+        .catch(err => res.status(400).json('Error:' + err));
+});
+
 module.exports = router;
